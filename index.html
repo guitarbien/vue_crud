@@ -74,7 +74,10 @@
                   </tfoot>
                   <tbody>
                     <tr v-for="row in rows" @click="row.selected = !row.selected" :class="{'is-selected' : row.selected}">
-                      <th @dblclick="modifyData(row)">{{ row.content }}</th>
+                      <th>
+                        <span @dblclick="modifyData(row)">{{ !row.modifyMode ? row.content : '' }}</span>
+                        <input type="text" v-model="row.content" v-show="row.modifyMode" @blur="doneEdit(row)" @keyup.enter="doneEdit(row)" @keyup.esc="cancelEdit(row)">
+                      </th>
                       <td><a href="https://en.wikipedia.org/wiki/Leicester_City_F.C." title="Leicester City F.C.">Leicester City</a> <strong>(C)</strong>
                       </td>
                       <td>38</td>
@@ -120,10 +123,11 @@
             el: '#root',
             data: {
                 inputData: '',
+                cacheData: null,
                 rows: [
-                    {"content": "three", selected: false},
-                    {"content": "two", selected: true},
-                    {"content": "one", selected: false}
+                    {"content": "three", selected: false, modifyMode: false},
+                    {"content": "two", selected: true, modifyMode: false},
+                    {"content": "one", selected: false, modifyMode: false}
                 ]
             },
             methods: {
@@ -139,7 +143,17 @@
                     this.rows.splice(index, 1);
                 },
                 modifyData: function(row) {
-
+                    this.cacheData = row.content;
+                    row.modifyMode = true;
+                },
+                doneEdit: function(row) {
+                    row.content = this.inputData;
+                    this.modifyData(this);
+                    // this.clearData();
+                },
+                cancelEdit: function(row) {
+                    row.content = this.cacheData;
+                    this.modifyData(row);
                 }
             }
         });
